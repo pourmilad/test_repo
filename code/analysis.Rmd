@@ -12,6 +12,8 @@ output:
     toc_float:
       collapsed: no
       smooth_scroll: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -69,37 +71,37 @@ data %>%
             CI_upper = Mean + (SEM * qt(0.975, length(growth)-1))) 
 
 theme_1 <- theme_classic()+
-  theme(text = element_text(size = 14),
-        axis.text = element_text(size = 14, colour = "black"), 
-        axis.title = element_text(size = 16, colour = "black"),
+  theme(text = element_text(size = 9),
+        axis.text = element_text(size = 9, colour = "black"), 
+        axis.title = element_text(size = 11, colour = "black"),
         panel.grid = element_blank(),
         panel.background = element_rect(fill = "white"),
         plot.background = element_rect(fill = "white"),
-        axis.line = element_line(linewidth = 0.6,lineend = "square"),
+        axis.line = element_line(linewidth = 0.6),
         legend.direction = "horizontal",
         legend.position = "top",
-        legend.text = element_text(size = 14)
+        legend.text = element_text(size = 9)
         )
 
 data %>% 
   ggplot(aes(x = treatment, y = growth, fill = species)) +
   
   geom_point(aes(x = treatment, y = Mean, colour = species),
-             size = 6,
-             position = position_dodge(width = 0.3),
+             size = 2.5,
+             position = position_dodge(width = 0.4),
              data = summary_data)+
   
   geom_errorbar(aes(x = treatment, y = Mean, ymin = CI_lower, ymax = CI_upper, colour = species),
-                position = position_dodge(width = 0.3), 
+                position = position_dodge(width = 0.4), 
                 width = 0.1,
                 show.legend = FALSE,
                 data = summary_data)+
   
   geom_jitter(aes(colour = species),
-              size = 3,
-              alpha = 0.5,
-              position = position_jitterdodge(jitter.width = 0.3, 
-                                              dodge.width = 0.8),
+              size = 1,
+              alpha = 0.3,
+              position = position_jitterdodge(jitter.width = 0.4, 
+                                              dodge.width = 1),
               show.legend = FALSE)+
   
   labs(y = bquote(Growth~rate~(day^-1)),
@@ -118,6 +120,8 @@ data %>%
                       values = c("grey50", "grey10"))+
   
   theme_1
+
+# ggsave("C:/Users/xpoumi/OneDrive/1. PhD GU/1. Research/github_test_repo/test_repo/figures/scatteplot.tiff", units = "mm", width = 80, height = 70, dpi = 700)
 ```
 
 
