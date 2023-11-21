@@ -1,0 +1,123 @@
+---
+title: "Test RMarkdown and github"
+author: "Milad Pourdanandeh"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: tibble
+    theme: darkly
+    highlight: zenburn
+    toc: yes
+    toc_depth: 6
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/xpoumi/OneDrive/1. PhD GU/1. Research/github_test_repo/test_repo")
+getwd()
+```
+
+```{r load packages}
+# Check if the 'pacman' package is installed, if not, install it
+if (!require(pacman)) {
+  install.packages("pacman")
+}
+
+
+# Load/install packages from CRAN
+pacman::p_load(readr, ggpubr, tidyverse)
+
+```
+
+
+```{r}
+data <- 
+  read_delim("raw_data/data.csv", 
+             delim = ";", 
+             escape_double = FALSE, 
+             col_types = cols(treatment = col_factor(levels = c("0", 
+                                                                "1", 
+                                                                "2", 
+                                                                "5")), 
+                              species = col_factor(levels = c("sacculus", 
+                                                              "acuminata")), 
+                              growth = col_number()), 
+             trim_ws = TRUE)
+
+data$growth <- data$growth+0.5
+
+```
+
+```{r}
+str(data)
+
+``` 
+
+
+
+```{r fig.width=6, fig.height=4}
+summary_data <-
+data %>% 
+  group_by(species, treatment) %>% 
+  summarize(Mean = mean(growth),
+            St.dev = sd(growth),
+            SEM = St.dev / sqrt(length(growth)),
+            CI_lower = Mean - (SEM * qt(0.975, length(growth)-1)),
+            CI_upper = Mean + (SEM * qt(0.975, length(growth)-1))) 
+
+theme_1 <- theme_classic()+
+  theme(text = element_text(size = 14),
+        axis.text = element_text(size = 14, colour = "black"), 
+        axis.title = element_text(size = 16, colour = "black"),
+        panel.grid = element_blank(),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white"),
+        axis.line = element_line(linewidth = 0.6,lineend = "square"),
+        legend.direction = "horizontal",
+        legend.position = "top",
+        legend.text = element_text(size = 14)
+        )
+
+data %>% 
+  ggplot(aes(x = treatment, y = growth, fill = species)) +
+  
+  geom_point(aes(x = treatment, y = Mean, colour = species),
+             size = 6,
+             position = position_dodge(width = 0.3),
+             data = summary_data)+
+  
+  geom_errorbar(aes(x = treatment, y = Mean, ymin = CI_lower, ymax = CI_upper, colour = species),
+                position = position_dodge(width = 0.3), 
+                width = 0.1,
+                show.legend = FALSE,
+                data = summary_data)+
+  
+  geom_jitter(aes(colour = species),
+              size = 3,
+              alpha = 0.5,
+              position = position_jitterdodge(jitter.width = 0.3, 
+                                              dodge.width = 0.8),
+              show.legend = FALSE)+
+  
+  labs(y = bquote(Growth~rate~(day^-1)),
+       x  = bquote(Treatment~(nM)),
+       caption = "Growth rate as a function of treatment, coloured by species")+
+
+  scale_y_continuous(limits = c(0,1.5),
+                     expand = c(0,0))+
+  
+  scale_fill_manual(name = "", 
+                    labels = c("D. sacculus", "D. acuminata"),
+                    values = c("grey50", "grey10"))+
+  
+  scale_colour_manual(name = "",
+                      labels = c("D. sacculus", "D. acuminata"),
+                      values = c("grey50", "grey10"))+
+  
+  theme_1
+```
+
+
